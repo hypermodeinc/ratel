@@ -15,6 +15,7 @@ export default class VerticalPanelLayout extends React.Component {
     height: -1,
   }
 
+  separatorRef = React.createRef()
   body = React.createRef()
   second = React.createRef()
 
@@ -123,16 +124,20 @@ export default class VerticalPanelLayout extends React.Component {
         <div className='panel first' style={styles.first}>
           {first}
         </div>
-
         <Draggable
           axis='x'
-          bound='parent'
+          bounds='parent'
           onDrag={this._handleDrag}
           onStart={this._handleDragStart}
           onStop={this._handleDragStop}
           position={{ x: 0, y: 0 }}
+          nodeRef={this.separatorRef}
         >
-          <div className='separator' style={styles.separator} />
+          <div
+            className='separator'
+            ref={this.separatorRef}
+            style={styles.separator}
+          />
         </Draggable>
 
         <div className='panel second' ref={this.second} style={styles.second}>

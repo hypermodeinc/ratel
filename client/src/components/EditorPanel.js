@@ -28,6 +28,7 @@ export default function EditorPanel() {
   const { action, query, queryVars, bestEffort, readOnly } = useSelector(
     (state) => state.query,
   )
+  console.log('Redux query state:', query)
 
   const setReadOnly = (value) => dispatch(updateReadOnly(value))
   const setBestEffort = (value) => dispatch(updateBestEffort(value))
@@ -114,9 +115,9 @@ export default function EditorPanel() {
               actionable: isQueryDirty,
             })}
             onClick={() => {
-              if (query === '') {
-                return
-              }
+              // if (query === "") {
+              //     return
+              // }
 
               onRunCurrentQuery()
             }}
@@ -125,7 +126,6 @@ export default function EditorPanel() {
           </button>
         </div>
       </div>
-
       <Editor
         onUpdateQuery={onUpdateQuery}
         onHotkeyRun={onRunCurrentQuery}

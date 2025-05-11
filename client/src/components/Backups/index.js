@@ -119,12 +119,7 @@ export default function BackupsView(props) {
       }))
 
     return (
-      <AutosizeGrid
-        className='backups-table'
-        columns={columns}
-        rowGetter={(idx) => idx >= 0 && data[idx]}
-        rowsCount={data.length}
-      />
+      <AutosizeGrid className='backups-table' columns={columns} rows={data} />
     )
   }
 

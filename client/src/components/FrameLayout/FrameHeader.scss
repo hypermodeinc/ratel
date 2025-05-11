@@ -1,13 +1,15 @@
+@use "sass:color";
+
 /*
  * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@import "../../assets/css/bootstrap-colors.scss";
+@use "../../assets/css/bootstrap-colors.scss";
 
-.frame-item.collapsed .frame-header.active {
-  background-color: lighten($primary, 45);
-}
+// .frame-item.collapsed .frame-header.active {
+//     background-color: color.adjust(bootstrap-colors.$primary, $lightness: 45, $space: hsl);
+// }
 
 .frame-item .frame-header {
   border-bottom: 1px solid #d2d2d2;
@@ -34,8 +36,8 @@
   }
 
   .timing-outer {
-    $serverColor: desaturate(#f0ad4e, 30%);
-    $networkColor: desaturate(#337ab7, 30%);
+    $serverColor: color.adjust(#f0ad4e, $saturation: -30%, $space: hsl);
+    $networkColor: color.adjust(#337ab7, $saturation: -30%, $space: hsl);
 
     width: 90px;
     font-size: 13px;

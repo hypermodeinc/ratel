@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>
+ * SPDX-FileCopyrightText:  Hypermode Inc. <hello@hypermode.com>
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -17,7 +17,7 @@ import TypeProperties from './TypeProperties'
 import TypesTable from './TypesTable'
 
 import { isUserPredicate } from 'lib/dgraph-syntax'
-import { executeQuery, getDgraphClient } from 'lib/helpers'
+import { executeQuery } from 'lib/helpers'
 
 import './Schema.scss'
 
@@ -59,8 +59,9 @@ export default class Schema extends React.Component {
     })
 
     try {
-      const client = await getDgraphClient()
-      const schemaResponse = await client.newTxn().query('schema {}')
+      const schemaResponse = await executeQuery('schema {}', {
+        action: 'query',
+      })
 
       const data = schemaResponse.data
       this.setState({ lastUpdated: new Date() })

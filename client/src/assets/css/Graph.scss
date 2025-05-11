@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .progress .progress-bar {
   -webkit-transition: none;
   -o-transition: none;
@@ -39,7 +41,7 @@
 .partial-render-info {
   position: absolute;
   padding: 2px 5px;
-  background: transparentize(#fff, 0.7);
+  background: color.adjust(#fff, $alpha: -0.7);
   box-shadow: #fff 0 0 18px 0;
   z-index: 1;
   color: #5d5d5d;

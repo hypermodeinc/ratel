@@ -3,18 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getDgraphClientStub } from 'lib/helpers'
+import { setCurrentServerUrl } from 'lib/helpers'
 
 export const GET_INSTANCE_HEALTH_RESULT = 'cluster/GET_INSTANCE_HEALTH_RESULT'
 export const GET_CLUSTER_STATE_RESULT = 'cluster/GET_CLUSTER_STATE_RESULT'
 export const SET_IS_AUTHORIZED = 'cluster/SET_IS_AUTHORIZED'
+// Helper to get the current server URL from state
+function getServerUrl(getState) {
+  return getState().connection.serverHistory[0]?.url
+}
 
 export function getInstanceHealth() {
   return async (dispatch, getState) => {
-    const clientStub = await getDgraphClientStub()
-
+    const url = getServerUrl(getState)
+    setCurrentServerUrl(url)
     try {
-      const health = await clientStub.getHealth(true)
+      const response = await fetch(url + '/health')
+      if (!response.ok) throw new Error(await response.text())
+      const health = await response.json()
       dispatch(getInstanceHealthResult(health))
       dispatch(setIsAuthorized(true))
     } catch (err) {
@@ -35,10 +41,12 @@ export function getInstanceHealthResult(json) {
 
 export function getClusterState() {
   return async (dispatch, getState) => {
-    const client = await getDgraphClientStub()
-
+    const url = getServerUrl(getState)
+    setCurrentServerUrl(url)
     try {
-      const clusterState = await client.getState()
+      const response = await fetch(url + '/state')
+      if (!response.ok) throw new Error(await response.text())
+      const clusterState = await response.json()
       dispatch(getClusterStateResult(clusterState))
       dispatch(setIsAuthorized(true))
     } catch (err) {

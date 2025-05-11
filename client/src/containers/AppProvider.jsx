@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import produce from 'immer'
+import { produce } from 'immer'
 import React from 'react'
 import { Provider } from 'react-redux'
 import { applyMiddleware, compose, createStore } from 'redux'
 import { createTransform, persistStore } from 'redux-persist'
 import localStorage from 'redux-persist/lib/storage'
-import ReduxThunk from 'redux-thunk'
+import { thunk as ReduxThunk } from 'redux-thunk'
 
 import {
   loginUser,

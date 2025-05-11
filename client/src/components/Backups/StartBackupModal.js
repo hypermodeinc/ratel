@@ -49,7 +49,7 @@ export default function StartBackupModal({ onCancel, onStartBackup }) {
   )
 
   return (
-    <Modal show={true} onHide={onCancel}>
+    <Modal show={true} onHide={onCancel} backdrop='static' keyboard={false}>
       <Modal.Header closeButton>
         <Modal.Title>Start New Backup</Modal.Title>
       </Modal.Header>

@@ -13,7 +13,7 @@
 
   height: $lineWidth;
 
-  margin: ($size / 2 + 8px) 0;
+  margin: ($size * 0.5 + 8px) 0;
   padding: 0;
   position: relative;
 
@@ -37,15 +37,15 @@
     display: block;
     margin: 0;
     text-align: center;
-    transform: translateY(-$size / 2 + $lineWidth / 2);
+    transform: translateY(-$size * 0.5 + $lineWidth * 0.5);
     list-style: none;
     line-height: $size;
 
     width: $size;
     height: $size;
     color: var(--light);
-    border-radius: $size / 2;
-    font-size: $size / 2;
+    border-radius: $size * 0.5;
+    font-size: $size * 0.5;
     box-shadow: 0 0 1px 3px #eee;
   }
 

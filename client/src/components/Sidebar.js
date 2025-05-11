@@ -23,15 +23,30 @@ import logo from '../assets/images/dgraph.png'
 
 export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
   const currentServer = useSelector(
-    (state) => state.connection.serverHistory[0],
+    (state) => state.connection.serverHistory?.[0],
   )
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Sidebar initial state:', {
+      serverHistory: useSelector((state) => state.connection.serverHistory),
+      currentServer,
+    })
+  }
+
+  if (
+    !currentServer ||
+    typeof currentServer !== 'object' ||
+    !currentServer.url
+  ) {
+    return <div className='sidebar-empty'>No server connected</div>
+  }
 
   const dispatch = useDispatch()
   useInterval(() => dispatch(checkHealth({ unknownOnStart: false })), 30000)
 
   useEffect(() => {
     dispatch(checkHealth({ unknownOnStart: false }))
-  }, [currentServer.url, currentServer.refreshToken, dispatch])
+  }, [currentServer?.url, currentServer?.refreshToken, dispatch])
 
   const renderButton = ({
     menuId,
@@ -40,8 +55,19 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
     fontAwesomeIcon,
     extraClassname,
     locked,
+    key,
   }) => {
     const className = currentMenu === menuId ? 'link active' : 'link'
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Sidebar renderButton props:', {
+        menuId,
+        label,
+        icon,
+        fontAwesomeIcon,
+        extraClassname,
+        locked,
+      })
+    }
     return (
       <li className={extraClassname || ''}>
         <a
@@ -54,12 +80,12 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
         >
           {icon || <i className={'icon ' + fontAwesomeIcon} />}
           <label>{label}</label>
-          {locked && (
-            <i
-              title='Dgraph Alpha seems to restrict access to this feature. Are you logged in?'
-              className='acl-lock fas fa-lock'
-            />
-          )}
+          {/* {locked === true && (
+                        <i
+                            title="Dgraph Alpha seems to restrict access to this feature. Are you logged in?"
+                            className="acl-lock fas fa-lock"
+                        />
+                    )} */}
         </a>
       </li>
     )
@@ -152,6 +178,7 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
       menuId: 'connection',
       icon: iconDiv,
       label: label,
+      key: 'connection',
     })
   }
 
@@ -159,7 +186,7 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
     <div className='sidebar-container'>
       <div className='sidebar-menu'>
         <ul>
-          {renderConnectionButton()}
+          {/* {renderConnectionButton()} */}
 
           {renderButton({
             menuId: '',
@@ -174,14 +201,16 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
               </div>
             ),
             label: 'Console',
-            locked: currentServer.aclState !== OK,
+            locked: currentServer?.aclState !== OK,
+            key: 'console',
           })}
 
           {renderButton({
             menuId: 'schema',
             fontAwesomeIcon: 'fas fa-pencil-ruler',
             label: 'Schema',
-            locked: currentServer.aclState !== OK,
+            locked: currentServer?.aclState !== OK,
+            key: 'schema',
           })}
 
           {currentServer?.isAclEnabled &&
@@ -189,14 +218,16 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
               menuId: 'acl',
               fontAwesomeIcon: 'fas fa-unlock-alt',
               label: 'ACL',
-              locked: currentServer.aclState !== OK,
+              locked: currentServer?.aclState !== OK,
+              key: 'acl',
             })}
 
           {renderButton({
             menuId: 'cluster',
             fontAwesomeIcon: 'fas fa-layer-group',
             label: 'Cluster',
-            locked: currentServer.aclState !== OK,
+            locked: currentServer?.aclState !== OK,
+            key: 'cluster',
           })}
 
           {currentServer?.isBackupEnabled &&
@@ -204,13 +235,16 @@ export default function Sidebar({ currentMenu, currentOverlay, onToggleMenu }) {
               menuId: 'backups',
               fontAwesomeIcon: 'fas fa-hdd',
               label: 'Backups',
-              locked: currentServer.aclState !== OK,
+              locked: currentServer?.aclState !== OK,
+              key: 'backups',
             })}
 
           {renderButton({
             menuId: 'info',
-            fontAwesomeIcon: 'far fa-question-circle',
-            label: 'Help',
+            fontAwesomeIcon: 'fas fa-info-circle',
+            label: 'Info',
+            locked: false,
+            key: 'info',
           })}
         </ul>
       </div>

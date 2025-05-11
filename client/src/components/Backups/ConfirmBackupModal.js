@@ -22,7 +22,13 @@ export default function ConfirmBackupModal({
   const STRINGS = DISPLAY_STRINGS[backupConfig.destinationType]
 
   return (
-    <Modal show={true} onHide={onCancel} size='md'>
+    <Modal
+      show={true}
+      onHide={onCancel}
+      size='md'
+      backdrop='static'
+      keyboard={false}
+    >
       <Modal.Header closeButton>
         <Modal.Title>Confirm Backup</Modal.Title>
       </Modal.Header>
