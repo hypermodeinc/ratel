@@ -168,8 +168,7 @@ export default function PredicatesTable({
       key='autosizegrid'
       style={{ flex: 1 }}
       columns={columns}
-      rowGetter={(idx) => idx >= 0 && rows[idx]}
-      rowsCount={rows.length}
+      rows={rows}
       onGridSort={handleSort}
       onRowClick={onRowClicked}
       rowSelection={{

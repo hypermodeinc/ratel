@@ -1,3 +1,5 @@
+@use "sass:color";
+
 /*
  * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>
  * SPDX-License-Identifier: Apache-2.0
@@ -60,7 +62,7 @@
         sup.beta {
           font-size: 90%;
           margin-left: 3px;
-          color: desaturate(darkgoldenrod, 20%);
+          color: color.adjust(darkgoldenrod, $saturation: -20%, $space: hsl);
         }
 
         .connection-string {
@@ -106,7 +108,7 @@
           width: $size;
           background-color: var(--danger);
           opacity: 0.5;
-          transform: translateX(-2px - $size/2) translateY(-2px - $size/2) rotateZ(45deg);
+          transform: translateX(-2px - $size * 0.5) translateY(-2px - $size * 0.5) rotateZ(45deg);
         }
       }
     }

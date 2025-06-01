@@ -57,7 +57,7 @@ export default function EditUserModal({
   }
 
   return (
-    <Modal show={true} onHide={onCancel}>
+    <Modal show={true} onHide={onCancel} backdrop='static' keyboard={false}>
       <Modal.Header closeButton>
         <Modal.Title>{isCreate ? 'Create' : 'Edit'} User</Modal.Title>
       </Modal.Header>

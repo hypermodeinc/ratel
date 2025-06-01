@@ -96,9 +96,7 @@ export default function JsonDataAdapter(
     // WARNING: double JSON.stringify is intentional.
     const resp = await sendMutation(`{
           set {
-            <${group.uid}> <dgraph.group.acl> ${JSON.stringify(
-              JSON.stringify(acl),
-            )} .
+            <${group.uid}> <dgraph.group.acl> ${JSON.stringify(JSON.stringify(acl))} .
           }
         }`)
     if (resp?.data?.code !== 'Success') {

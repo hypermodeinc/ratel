@@ -34,8 +34,7 @@ export default function TypeProperties({
       enableCellAutoFocus={false}
       enableCellSelect={false}
       columns={columns}
-      rowGetter={(idx) => (idx < 0 ? {} : fields[idx])}
-      rowsCount={fields.length}
+      rows={fields}
     />
   )
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import jwt from 'jsonwebtoken'
+import { jwtDecode } from 'jwt-decode'
 import React from 'react'
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
@@ -21,9 +21,9 @@ export default function ServerLoginWidget({ isMultiTenancyEnabled }) {
   const dispatch = useDispatch()
 
   const token = currentServer.refreshToken
-  const jwtUserid = jwt.decode(token)?.userid
+  const jwtUserid = token ? jwtDecode(token)?.userid : null
 
-  const namespaceFromServer = jwt.decode(token)?.namespace
+  const namespaceFromServer = token ? jwtDecode(token)?.namespace : null
 
   const loggedIn = token && jwtUserid
   const [userid, setUserid] = React.useState(jwtUserid || 'groot')

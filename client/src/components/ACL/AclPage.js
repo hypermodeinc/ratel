@@ -117,8 +117,7 @@ function SortableGrid({
       className='datagrid'
       enableCellAutoFocus={false}
       columns={columns}
-      rowGetter={(idx) => (idx < 0 ? {} : gridData[idx])}
-      rowsCount={gridData.length}
+      rows={gridData}
       onGridSort={handleSort}
       onRowClick={(idx) => setSelectedName(gridData[idx]?.name)}
       rowSelection={{

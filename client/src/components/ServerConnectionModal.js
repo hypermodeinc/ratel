@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>
+ * SPDX-FileCopyrightText:  Hypermode Inc. <hello@hypermode.com>
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -309,13 +309,7 @@ export default function ServerConnectionModal() {
   )
 
   return (
-    <Modal
-      centered
-      show={true}
-      size='lg'
-      onHide={onHide}
-      className='server-connection'
-    >
+    <Modal show={true} onHide={onHide} backdrop='static' keyboard={false}>
       <Modal.Header closeButton>
         <Modal.Title>
           <img src={DgraphLogo} alt='Dgraph Logo' className='logo' />

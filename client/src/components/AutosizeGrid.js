@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import ReactDataGrid from 'react-data-grid'
+import { DataGrid } from 'react-data-grid'
 
 export default class AutosizeGrid extends React.Component {
   state = {
@@ -26,7 +26,7 @@ export default class AutosizeGrid extends React.Component {
               height,
               width,
             },
-            () => this.dataGrid.current.metricsUpdated(),
+            // () => this.dataGrid.current.metricsUpdated(),
           )
         }
       }
@@ -43,9 +43,9 @@ export default class AutosizeGrid extends React.Component {
     const { className, style, ...otherProps } = this.props
     return (
       <div className={className} style={style} ref={this.outerRef}>
-        <ReactDataGrid
-          ref={this.dataGrid}
-          minHeight={this.state.height}
+        <DataGrid
+          rows={rows}
+          style={{ minHeight: this.state.height }}
           {...otherProps}
         />
       </div>

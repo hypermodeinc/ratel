@@ -1,11 +1,10 @@
 /*
- * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>
+ * SPDX-FileCopyrightText: © Hypermode Inc. <hello@hypermode.com>;
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as dgraph from 'dgraph-js-http'
+// import memoizeOne from "memoize-one";
 import JSONbigint from 'json-bigint'
-import memoizeOne from 'memoize-one'
 
 export function createCookie(name, val, days, options = {}) {
   const cookie = [`${name}=${val}`, 'path=/']
@@ -67,10 +66,12 @@ export function humanizeBytes(space) {
 }
 
 let dgraphServerUrl = getDefaultUrl()
-const clientStubOptions = {
-  headers: {
-    'Content-Type': 'application/dql',
-  },
+let dgraphAuthToken = null
+let dgraphSlashApiKey = null
+let dgraphQueryTimeout = null
+
+export function setCurrentServerUrl(url) {
+  dgraphServerUrl = url
 }
 
 export const parseDgraphUrl = (url) => {
@@ -110,52 +111,29 @@ export const parseDgraphUrl = (url) => {
   }
 }
 
-const createDgraphClient = memoizeOne(async (url) => {
-  const stub = new dgraph.DgraphClientStub(
-    url,
-    {
-      jsonParser: JSONbigint.parse.bind(JSONbigint),
-    },
-    clientStubOptions,
-  )
-  try {
-    await stub.detectApiVersion()
-  } catch (err) {
-    // Ignore error, it's probably a bad URL
-  }
-
-  return {
-    client: new dgraph.DgraphClient(stub),
-    stub,
-  }
-})
-
-export function setCurrentServerUrl(url) {
-  dgraphServerUrl = url
-  createDgraphClient(url)
-}
-
 export async function setCurrentServerQueryTimeout(timeout) {
-  ;(await createDgraphClient(dgraphServerUrl)).client.setQueryTimeout(timeout)
+  dgraphQueryTimeout = timeout
 }
 
 export function setCurrentServerSlashApiKey(slashApiKey) {
-  if (slashApiKey) {
-    clientStubOptions.headers['X-Auth-Token'] = slashApiKey
-    clientStubOptions.headers['Authorization'] = 'Bearer ' + slashApiKey
-  }
+  dgraphSlashApiKey = slashApiKey
 }
 
 export function setCurrentServerAuthToken(authToken) {
-  clientStubOptions.headers['X-Dgraph-AuthToken'] = authToken
+  dgraphAuthToken = authToken
 }
 
-export const getDgraphClient = async () =>
-  (await createDgraphClient(dgraphServerUrl)).client
+// Helper to build headers
+function buildHeaders(contentType = 'application/dql') {
+  const headers = {
+    'Content-Type': contentType,
+  }
+  if (dgraphAuthToken) headers['X-Dgraph-AccessToken'] = dgraphAuthToken
+  if (dgraphSlashApiKey) headers['X-Auth-Token'] = dgraphSlashApiKey
+  return headers
+}
 
-export const getDgraphClientStub = async () =>
-  (await createDgraphClient(dgraphServerUrl)).stub
-
+// Main query/mutation executor
 export async function executeQuery(
   query,
   {
@@ -166,46 +144,84 @@ export async function executeQuery(
     queryVars = undefined,
   } = {},
 ) {
-  if (action === 'mutate' || action === 'alter') {
-    debug = false
+  console.log('[executeQuery] called with:', {
+    query,
+    action,
+    debug,
+    readOnly,
+    bestEffort,
+    queryVars,
+  })
+  const url = dgraphServerUrl
+  const headers = buildHeaders('application/dql')
+  let body = query
+  let endpoint = '/query'
+  const params = []
+  if (debug) params.push('debug=true')
+  if (readOnly) params.push('ro=true')
+  if (bestEffort) params.push('be=true')
+  if (dgraphQueryTimeout) {
+    // If the value is a number or a string without a unit, append 's' for seconds
+    const timeoutStr =
+      typeof dgraphQueryTimeout === 'number' ||
+      /^[0-9]+$/.test(dgraphQueryTimeout)
+        ? `${dgraphQueryTimeout}s`
+        : dgraphQueryTimeout
+    params.push(`timeout=${timeoutStr}`)
+  }
+  if (params.length) endpoint += `?${params.join('&')}`
+
+  if (action === 'mutate') {
+    endpoint = '/mutate'
+    headers['Content-Type'] = 'application/rdf'
   }
   if (action === 'alter') {
     return executeAlter(query)
   }
 
-  const client = await getDgraphClient()
-
-  if (action === 'query') {
-    return client
-      .newTxn({ readOnly, bestEffort })
-      .queryWithVars(query, queryVars, { debug })
-  } else if (action === 'mutate') {
-    return client.newTxn().mutate({ mutation: query, commitNow: true })
+  // Support GraphQL variables (for /query)
+  if (queryVars && Object.keys(queryVars).length > 0) {
+    headers['Content-Type'] = 'application/json'
+    body = JSON.stringify({ query, variables: queryVars })
   }
-  console.error('Unknown Method: ', action)
-  throw new Error('Unknown Method: ' + action)
-}
 
-// TODO: this code should be part of dgraph-js-http
-export async function executeAdminGql(query, variables) {
-  const client = await getDgraphClientStub()
-  return await client.callAPI('admin', {
+  console.log('[executeQuery] fetch to:', url + endpoint)
+  const response = await fetch(url + endpoint, {
     method: 'POST',
-    headers: {
-      ...clientStubOptions.headers,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-      operationName: null,
-    }),
+    headers,
+    body,
   })
+  console.log('[executeQuery] response status:', response.status)
+  const text = await response.text()
+  console.log('[executeQuery] response text:', text)
+  if (!response.ok) throw new Error(text)
+  return JSONbigint.parse(text)
 }
 
 export async function executeAlter(schema) {
-  const client = await getDgraphClient()
-  return client.alter({ schema })
+  const url = dgraphServerUrl + '/alter'
+  const headers = buildHeaders('application/dql')
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: schema,
+  })
+  if (!response.ok) throw new Error(await response.text())
+  return JSONbigint.parse(await response.text())
+}
+
+export async function executeAdminGql(query, variables) {
+  // POSTs to /admin endpoint with GraphQL
+  const url = dgraphServerUrl + '/admin'
+  const headers = buildHeaders('application/json')
+  const body = JSON.stringify({ query, variables, operationName: null })
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body,
+  })
+  if (!response.ok) throw new Error(await response.text())
+  return JSONbigint.parse(await response.text())
 }
 
 export function getHashParams() {

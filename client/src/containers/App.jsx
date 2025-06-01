@@ -23,7 +23,7 @@ import { setActiveFrame } from 'actions/frames'
 import { updateQueryAndAction } from 'actions/query'
 import { clickSidebarUrl } from 'actions/ui'
 
-import '../assets/css/App.scss'
+import '@/assets/css/App.scss'
 
 class App extends React.Component {
   async componentDidMount() {
@@ -37,9 +37,9 @@ class App extends React.Component {
   }
 
   getOverlayContent = (overlayUrl) => {
-    if (overlayUrl === 'info') {
-      return <SidebarInfo />
-    }
+    // if (overlayUrl === "info") { //! TODO FIX THIS
+    //     return <SidebarInfo />
+    // }
     return null
   }
 

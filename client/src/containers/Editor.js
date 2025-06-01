@@ -7,10 +7,11 @@ import isEmpty from 'lodash.isempty'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 
-import { getDgraphClient } from 'lib/helpers'
 import CodeMirror from './CodeMirror'
 
 import '../assets/css/Editor.scss'
+
+import { executeQuery } from 'lib/helpers'
 
 function isJSON(value) {
   return /^\s*{\s*"/.test(value)
@@ -49,9 +50,10 @@ export default function Editor({
   useEffect(checkLayoutSize, [_bodyRef, height, allState])
 
   const fetchSchema = useCallback(async () => {
-    const client = await getDgraphClient()
     try {
-      const schemaResponse = await client.newTxn().query('schema {}')
+      const schemaResponse = await executeQuery('schema {}', {
+        action: 'query',
+      })
 
       const schema = schemaResponse.data.schema
       const types = schemaResponse.data.types
@@ -70,10 +72,13 @@ export default function Editor({
   }, [setKeywords])
 
   const fetchUiKeywords = useCallback(async () => {
-    const client = await getDgraphClient()
     try {
-      const result = await client.fetchUiKeywords()
-      setKeywords((kws) => kws.concat(result.keywords.map((kw) => kw.name)))
+      const response = await fetch('/ui/keywords')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      setKeywords((kws) => kws.concat(data.keywords.map((kw) => kw.name)))
     } catch (error) {
       console.warn('Editor: Error while fetching ui/keywords', error)
     }
@@ -97,8 +102,11 @@ export default function Editor({
 
   // Once after mount
   useEffect(() => {
+    if (_editorRef.current && _editorRef.current.firstChild) {
+      _editorRef.current.removeChild(_editorRef.current.firstChild)
+    }
     const editor = CodeMirror(_editorRef.current, {
-      value: '',
+      value: query || '',
       lineNumbers: true,
       tabSize: 2,
       lineWrapping: true,
@@ -114,12 +122,19 @@ export default function Editor({
       viewportMargin: 200,
     })
     setEditorInstance(editor)
-    //editor.setCursor(editor.lineCount(), 0); // Set the cursor at the end of existing content
+    editor.setCursor(editor.lineCount(), 0) // Set the cursor at the end of existing content
     // Force-focus the editor
     setTimeout(() => {
       editor.refresh()
-      //editor.focus();
+      editor.focus()
     })
+
+    return () => {
+      // Remove the CodeMirror instance from the DOM
+      if (_editorRef.current && _editorRef.current.firstChild) {
+        _editorRef.current.removeChild(_editorRef.current.firstChild)
+      }
+    }
   }, [])
 
   const useEditorEffect = (fn, deps) =>
@@ -149,6 +164,8 @@ export default function Editor({
       const value = editorInstance.getValue()
       const isJsonValue = isJSON()
 
+      console.log('CodeMirror change:', value)
+
       if (editorInstance.getMode().name === 'graphql') {
         if (isJsonValue) {
           editorInstance.setOption('mode', {
@@ -161,6 +178,7 @@ export default function Editor({
       }
 
       if (onUpdateQuery) {
+        console.log('Updating query:', value)
         onUpdateQuery(value)
       }
     }
@@ -181,6 +199,7 @@ export default function Editor({
   // Every time query changes
   useEditorEffect(() => {
     if (query !== getValue()) {
+      console.log('Setting query:', query)
       editorInstance.setValue(query)
     }
   }, [query])

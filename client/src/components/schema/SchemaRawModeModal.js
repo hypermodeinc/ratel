@@ -44,7 +44,13 @@ export default function SchemaRawModeModal({
   }
 
   return (
-    <Modal show={true} size='lg' onHide={onCancel}>
+    <Modal
+      show={true}
+      size='lg'
+      onHide={onCancel}
+      backdrop='static'
+      keyboard={false}
+    >
       <Modal.Header closeButton>
         <Modal.Title>Edit Schema File</Modal.Title>
       </Modal.Header>

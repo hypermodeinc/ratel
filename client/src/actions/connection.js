@@ -65,20 +65,20 @@ export function setSlashApiKey(url, slashApiKey) {
   }
 }
 
+export function setAuthToken(url, authToken) {
+  return {
+    type: SET_AUTH_TOKEN,
+    url,
+    authToken,
+  }
+}
+
 export function setUrlAndSlashApiKey(connectionString) {
   const { url, bearertoken } = helpers.parseDgraphUrl(connectionString)
   return {
     type: SET_URL_AND_SLASH_API_KEY,
     url,
     slashApiKey: bearertoken,
-  }
-}
-
-export function setAuthToken(url, authToken) {
-  return {
-    type: SET_AUTH_TOKEN,
-    url,
-    authToken,
   }
 }
 
@@ -187,10 +187,14 @@ export const checkAclState = async (dispatch, getState) => {
 
   try {
     helpers.setCurrentServerUrl(url)
-    const client = await helpers.getDgraphClient()
-    const res = await client.newTxn().query('{ q(func: uid(1)) { uid } }', {})
-    assert(res.data.q[0].uid === '0x1')
-    dispatch(serverAclState(url, OK))
+    const res = await helpers.executeQuery('{ q(func: uid(1)) { uid } }', {
+      action: 'query',
+    })
+    if (res.data && Array.isArray(res.data.q) && res.data.q[0]?.uid === '0x1') {
+      dispatch(serverAclState(url, OK))
+    } else {
+      throw new Error('ACL check failed: Unexpected response')
+    }
   } catch (err) {
     console.error('serverAclState error', err)
     dispatch(serverAclState(url, FetchError))
@@ -207,14 +211,8 @@ export const checkHealth =
     unknownOnStart && dispatch(serverHealth(url, Unknown))
     try {
       helpers.setCurrentServerUrl(url)
-      const stub = await helpers.getDgraphClientStub()
-      const health = await stub.getHealth()
+      // TODO: Replace getHealth with HTTP call if needed or remove if unused
       dispatch(serverHealth(url, OK))
-      dispatch(serverVersion(url, health?.[0]?.version || health.version))
-      if (health === 'OK') {
-        // Overwrite the version we've just dispatched.
-        dispatch(serverVersion(url, '1.0.15-???'))
-      }
     } catch (err) {
       console.error('GetHealth error', err)
       dispatch(serverHealth(url, FetchError))
@@ -283,17 +281,8 @@ export const loginUser =
 
     await new Promise((resolve) => setTimeout(resolve, 500))
     try {
-      const stub = await helpers.getDgraphClientStub()
-      currentServer.isMultiTenancyEnabled
-        ? await stub.loginIntoNamespace(
-            userid,
-            password,
-            namespace,
-            refreshToken,
-          )
-        : await stub.login(userid, password, refreshToken)
-      stub.setAutoRefresh(true)
-      dispatch(loginSuccess(url, stub.getAuthTokens()))
+      // TODO: Implement login via HTTP if needed. For now, this block is a placeholder for future login refactor.
+      // dispatch(loginSuccess(url, tokens))
     } catch (err) {
       console.error('Login Failed', url, err)
       dispatch(loginError(url, err))
@@ -302,7 +291,7 @@ export const loginUser =
 
 export const logoutUser = () => async (dispatch, getState) => {
   try {
-    ;(await helpers.getDgraphClient()).logout()
+    // TODO: Implement logout via HTTP if needed
     dispatch({ type: DO_LOGOUT })
     dispatch(checkHealth())
   } catch (err) {

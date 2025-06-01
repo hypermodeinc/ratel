@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .graph-overlay {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.75);
@@ -31,9 +33,9 @@
     border: 1px solid $color;
     border-radius: 2px;
     color: $color;
-    &:hover {
-      color: darken($color, 30);
-    }
+    // &:hover {
+    //     color: color.adjust($color, $lightness: -30, $space: hsl);
+    // }
     margin-right: 2px;
   }
 }

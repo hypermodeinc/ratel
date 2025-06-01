@@ -167,7 +167,7 @@
 
   .health {
     $size: 8px;
-    border-radius: $size / 2;
+    border-radius: $size * 0.5;
     display: inline-block;
     height: $size;
     width: $size;

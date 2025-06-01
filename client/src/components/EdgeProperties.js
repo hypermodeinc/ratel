@@ -22,9 +22,7 @@ export default function EdgeProperties({
 
   return (
     <div>
-      <label>
-        {`${edge.source.uid} <${edge.predicate}> ${edge.target.uid}`}
-      </label>
+      <label>{`${edge.source.uid} <${edge.predicate}> ${edge.target.uid}`}</label>
       <div
         className='btn-toolbar mb-2'
         role='toolbar'

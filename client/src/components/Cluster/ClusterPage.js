@@ -122,7 +122,7 @@ export default function ClusterPage() {
       return
     }
 
-    const remainingMs = clusterState.license.expiryTs * 1000 - Date.now()
+    const remainingMs = clusterState?.license?.expiryTs * 1000 - Date.now()
 
     return (
       <div className='zeros'>
@@ -130,16 +130,16 @@ export default function ClusterPage() {
           <h1>Zeros ({Object.values(zeros).length})</h1>
           <div className='license'>
             <span className='value'>
-              {clusterState.license.enabled
+              {clusterState?.license?.enabled
                 ? 'Enterprise License'
                 : 'Community Edition'}
             </span>
             <br />
             Max Nodes:{' '}
             <span className='value'>
-              {clusterState.license.maxNodes > 1e10
+              {clusterState?.license?.maxNodes > 1e10
                 ? '∞'
-                : clusterState.license.maxNodes}
+                : clusterState?.license?.maxNodes}
             </span>
             <br />
             {remainingMs > 0 ? 'Expires' : 'Expired'}:{' '}

@@ -114,9 +114,7 @@ export default ({
             : remainingNodes > 0
               ? `Showing ${
                   nodesDataset.size + remainingNodes
-                } nodes (${remainingNodes} hidden) and ${
-                  edgesDataset.size
-                } edges`
+                } nodes (${remainingNodes} hidden) and ${edgesDataset.size} edges`
               : `Showing ${nodesDataset.size} nodes and ${edgesDataset.size} edges`
         }
         height={panelHeight}

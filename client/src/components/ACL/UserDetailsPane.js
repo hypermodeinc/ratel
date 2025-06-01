@@ -96,8 +96,7 @@ export default class UserDetailsPane extends React.Component {
         enableCellAutoFocus={false}
         enableCellSelect={false}
         columns={groupColumns}
-        rowGetter={(idx) => (idx < 0 ? {} : gridData[idx])}
-        rowsCount={gridData.length}
+        rows={gridData}
       />
     )
 
